@@ -5,7 +5,7 @@
 
 ---
 
-Passei anos recomendando particionamento como primeira linha de defesa em performance. E continuo recomendando — com asterisco.
+Passei anos recomendando particionamento como primeira linha de defesa em performance. E continuo recomendando, com asterisco.
 
 Porque o Databricks mudou as regras. E quem não atualizou o mental model ainda está otimizando para um problema que a plataforma já resolveu de outro jeito.
 
@@ -15,7 +15,7 @@ Este artigo é o que eu gostaria de ter lido antes de errar algumas vezes.
 
 ## O problema com particionamento clássico
 
-Particionamento no Hive — e por extensão no Spark tradicional — funciona assim: você escolhe uma ou mais colunas na criação da tabela, e os dados são fisicamente separados em diretórios no storage.
+Particionamento no Hive, e por extensão no Spark tradicional, funciona assim: você escolhe uma ou mais colunas na criação da tabela, e os dados são fisicamente separados em diretórios no storage.
 
 ```
 s3://bucket/tabela/
@@ -24,7 +24,7 @@ s3://bucket/tabela/
 └── ano=2024/mes=03/
 ```
 
-Quando uma query filtra por `ano=2024 AND mes=01`, o Spark lê só aquele diretório. Partition pruning. Funciona muito bem — quando você acerta a coluna certa.
+Quando uma query filtra por `ano=2024 AND mes=01`, o Spark lê só aquele diretório. Partition pruning. Funciona muito bem , quando você acerta a coluna certa.
 
 O problema é que você precisa **adivinhar o futuro** na hora de criar a tabela.
 
@@ -105,7 +105,7 @@ CLUSTER BY (cliente_id, data_venda);
 
 ### Como funciona por baixo
 
-O Liquid Clustering usa um algoritmo de clustering incremental. Em vez de reorganizar toda a tabela (como o OPTIMIZE + ZORDER faz), ele reorganiza **incrementalmente** só os arquivos que precisam — e faz isso de forma automática quando você roda `OPTIMIZE`.
+O Liquid Clustering usa um algoritmo de clustering incremental. Em vez de reorganizar toda a tabela (como o OPTIMIZE + ZORDER faz), ele reorganiza **incrementalmente** só os arquivos que precisam , e faz isso de forma automática quando você roda `OPTIMIZE`.
 
 ```sql
 -- Basta rodar OPTIMIZE, o clustering é aplicado automaticamente
@@ -194,11 +194,11 @@ CLUSTER BY (cliente_id, data_venda);
 
 Não queria escrever sobre isso sem testar. Então rodei.
 
-Criei um notebook no Databricks com uma tabela de vendas sintética — 200 milhões de linhas, 500 mil clientes distintos, dados de 2 anos. Criei as 4 versões da mesma tabela e medi a estrutura física resultante de cada estratégia.
+Criei um notebook no Databricks com uma tabela de vendas sintética , 200 milhões de linhas, 500 mil clientes distintos, dados de 2 anos. Criei as 4 versões da mesma tabela e medi a estrutura física resultante de cada estratégia.
 
-O código está disponível no meu GitHub para quem quiser reproduzir. Cada célula cria uma versão da tabela e roda o mesmo conjunto de queries — você pode validar no seu próprio ambiente.
+O código está disponível no meu GitHub para quem quiser reproduzir. Cada célula cria uma versão da tabela e roda o mesmo conjunto de queries , você pode validar no seu próprio ambiente.
 
-Rodei no Databricks Serverless (DBR 16.4, Spark 3.5.2). Uma observação importante: em ambiente Serverless o cache automático de resultados mascara diferenças de tempo de execução para volumes pequenos. O que o benchmark mostra com clareza é a **estrutura física** — e é aí que a história fica interessante.
+Rodei no Databricks Serverless (DBR 16.4, Spark 3.5.2). Uma observação importante: em ambiente Serverless o cache automático de resultados mascara diferenças de tempo de execução para volumes pequenos. O que o benchmark mostra com clareza é a **estrutura física** , e é aí que a história fica interessante.
 
 Rodei um benchmark com uma tabela de vendas com 200 milhões de linhas, simulando um cenário real de e-commerce com 500 mil clientes distintos. Criei as mesmas 4 versões da tabela e medi a estrutura física resultante.
 
@@ -211,9 +211,9 @@ Rodei um benchmark com uma tabela de vendas com 200 milhões de linhas, simuland
 | Z-Order por cliente_id | 9 | ~62 MB | OPTIMIZE compactou bem |
 | Liquid Clustering | 9 | ~65 MB | Compactado + layout otimizado |
 
-O particionamento por data gerou **730 arquivos de menos de 1MB cada** — o pior cenário possível para uma query que filtra por `cliente_id`. O Spark precisa abrir todos os 730 arquivos, verificar os metadados de cada um e só então descartar os que não têm o cliente buscado.
+O particionamento por data gerou **730 arquivos de menos de 1MB cada** , o pior cenário possível para uma query que filtra por `cliente_id`. O Spark precisa abrir todos os 730 arquivos, verificar os metadados de cada um e só então descartar os que não têm o cliente buscado.
 
-O Z-Order e o Liquid Clustering compactaram para 9 arquivos grandes. Com arquivos de 62MB, o Delta mantém estatísticas de min/max eficientes por arquivo — o data skipping funciona de verdade.
+O Z-Order e o Liquid Clustering compactaram para 9 arquivos grandes. Com arquivos de 62MB, o Delta mantém estatísticas de min/max eficientes por arquivo , o data skipping funciona de verdade.
 
 **O que isso significa em produção:**
 
@@ -226,9 +226,9 @@ A diferença de arquivos se traduz diretamente em I/O. Para uma tabela de 800GB 
 | Z-Order por cliente_id | ~576 | ~890 | ~93% |
 | Liquid Clustering | ~576 | ~312 | ~97% |
 
-O Liquid Clustering evita abrir **97% dos arquivos** numa query típica por `cliente_id` — porque o layout físico dos dados foi organizado exatamente para esse padrão de acesso.
+O Liquid Clustering evita abrir **97% dos arquivos** numa query típica por `cliente_id` , porque o layout físico dos dados foi organizado exatamente para esse padrão de acesso.
 
-> A diferença de tempo que você vê em produção — de minutos para segundos — é consequência direta dessa redução de I/O. Menos arquivos abertos = menos leitura de S3 = menos tempo.
+> A diferença de tempo que você vê em produção , de minutos para segundos , é consequência direta dessa redução de I/O. Menos arquivos abertos = menos leitura de S3 = menos tempo.
 
 ---
 
@@ -278,7 +278,7 @@ Antes era: *"em qual coluna devo particionar?"*
 
 Agora é: *"qual estratégia de layout físico faz sentido para o meu padrão de acesso, volume e frequência de ingestão?"*
 
-O Liquid Clustering não elimina a necessidade de pensar em performance. Ele elimina a necessidade de adivinhar o futuro — e pune menos quando você erra.
+O Liquid Clustering não elimina a necessidade de pensar em performance. Ele elimina a necessidade de adivinhar o futuro, e pune menos quando você erra.
 
 E isso, na prática, muda bastante coisa.
 
