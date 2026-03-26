@@ -283,12 +283,15 @@ O Liquid Clustering não elimina a necessidade de pensar em performance. Ele eli
 E isso, na prática, muda bastante coisa.
 
 ---
-
 ## Referências
 
 - Databricks Documentation. *Liquid Clustering for Delta tables*. docs.databricks.com
 - Armbrust, M. et al. *Delta Lake: High-Performance ACID Table Storage over Cloud Object Stores*. VLDB 2020.
 - Databricks Engineering Blog. *Introducing Liquid Clustering: The Future of Data Layout in Delta Lake*. databricks.com/blog
+
+---
+
+
 
 ---
 
