@@ -7,7 +7,7 @@
 
 Passei anos recomendando particionamento como primeira linha de defesa em performance. E continuo recomendando, com asterisco.
 
-Porque o Databricks mudou as regras. E quem não atualizou o mental model ainda está otimizando para um problema que a plataforma já resolveu de outro jeito.
+Porque o Databricks mudou as regras. E quem não atualizou o mental model ainda está otimizando para um problema que a plataforma já resolveu de outro jeito. 
 
 Este artigo é o que eu gostaria de ter lido antes de errar algumas vezes.
 
